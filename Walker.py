@@ -2,15 +2,15 @@ import numpy as np
 
 
 class Walker:
-    def __init__(self, number, electron):
-        self.number = number
+    def __init__(self, id, electron, position = np.random.uniform(-1, 1, 3)):
+        self.id = id
         self.electron = electron
-        self.position = np.random.uniform(-1, 1, 3)
+        self.position = position
         self.distance = self.get_distance_from_origin()
         self.merit = 0
 
     def __str__(self):
-        return "Walker {} of electron {] with x = [{}, {}, {}] = {}, m = {}".format(self.number,
+        return "Walker {} of electron {] with x = [{}, {}, {}] = {}, m = {}".format(self.id,
                                                                                     self.electron,
                                                                                     self.position[0],
                                                                                     self.position[1],
