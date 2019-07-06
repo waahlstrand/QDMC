@@ -2,21 +2,21 @@ import numpy as np
 
 
 class Walker:
-    def __init__(self, id, electron, position, dims = 1):
+    def __init__(self, id, position, dims = 1):
         self.id         = id
-        self.electron   = electron
         self.position   = position
         self.dims       = dims
         self.distance   = self.get_distance_from_origin()
         self.merit      = 0
 
     def __str__(self):
-        return "Walker {} of electron {] with x = [{}, {}, {}] = {}, m = {}".format(self.id,
-                                                                                    self.electron,
-                                                                                    self.position[0],
-                                                                                    self.position[1],
-                                                                                    self.position[2],
-                                                                                    self.merit)
+
+        if self.dims == 3:
+            return "Walker %d with x = [%f, %f, %f], m = %d" % (self.id, self.position[0],self.position[1], self.position[2], self.merit)
+        elif self.dims == 1:
+            return "Walker %d with x = [%f], m = %d" % (self.id, self.position[0], self.merit)
+        else:
+            return "Dimension not implemented."
 
     def get_distance_from_origin(self):
         """

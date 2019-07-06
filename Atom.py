@@ -1,53 +1,107 @@
-from Electron import Electron
+from Walker import Walker
 import numpy as np
 
 
 class Atom:
 
-    def __init__(self, alpha, nbr_of_walkers = None, dims = 1, electrons = [], element = "Hydrogen"):
-
+    def __init__(self, alpha, nbr_of_walkers = None, dims = 1, walkers = [], element = "Hydrogen"):
+        
         # Set important state parameters
         self.element            = element
         self.alpha              = alpha
         self.nbr_of_electrons   = self.get_nbr_of_electrons()
-        self.inter_electron_distances = []
+        #self.inter_electron_distances = []
         self.dims               = dims
+        
+        # Set walkers
+        self.walkers            = walkers if walkers else self.make_walkers(nbr_of_walkers)        
+        self.nbr_of_walkers     = nbr_of_walkers if nbr_of_walkers else len(self.walkers)
 
-        # Other parameters
-        self.nbr_of_walkers     = None
-        self.electrons          = []
+        # Walker derived values
+        self.positions      = self.make_positions()
+        self.distances      = self.make_distances()
 
-        # Set electrons: Either list of supplied electrons or random initializations
-        self.set_electrons(nbr_of_walkers, electrons)
-
-
-    def set_electrons(self, nbr_of_walkers, electrons):
-
-        if electrons:
-
-            # Set number of walkers
-            self.nbr_of_walkers = electrons[0].nbr_of_walkers
-
-            # Add predefined electrons
-            self.electrons = electrons
-
-        elif nbr_of_walkers:
+    def make_walkers(self, nbr_of_walkers):
             
-            # Set number of walkers
-            self.nbr_of_walkers = nbr_of_walkers
+        # Declare new set of walkers
+        walkers = []
 
-            # Initialize new electrons
-            electrons = []
+        # Create walkers
+        for _ in range(nbr_of_walkers):
 
-            # Create new electrons
-            for _ in range(self.nbr_of_electrons):
+            # Generate random locations
+            position = np.random.uniform(-2, 2, self.dims)
+
+            walker = Walker(id=_, position = position)
+
+            walkers.append(walker)
+
+        return walkers
+
+    def make_positions(self):
+
+
+
+        pos = np.zeros((self.nbr_of_walkers, self.dims))
+
+        # Extract all walker positions as a numpy array
+        for walker, i in zip(self.walkers, range(self.nbr_of_walkers)):
+
+            pos[i] = walker.position
+
+        return pos
+
+    
+    def make_distances(self):
+
+        return np.linalg.norm(self.positions, ord=2, axis=1)
+
+    # def __init__(self, alpha, nbr_of_walkers = None, dims = 1, electrons = [], element = "Hydrogen"):
+
+    #     # Set important state parameters
+    #     self.element            = element
+    #     self.alpha              = alpha
+    #     self.nbr_of_electrons   = self.get_nbr_of_electrons()
+    #     self.inter_electron_distances = []
+    #     self.dims               = dims
+
+    #     # Other parameters
+    #     self.nbr_of_walkers     = None
+    #     self.walkers            = []
+
+    #     # Set electrons: Either list of supplied electrons or random initializations
+    #     self.set_walkers(nbr_of_walkers, electrons)
+
+
+    # def set_electrons(self, nbr_of_walkers, electrons):
+
+    #     if electrons:
+
+    #         # Set number of walkers
+    #         self.nbr_of_walkers = electrons[0].nbr_of_walkers
+
+    #         # Add predefined electrons
+    #         self.electrons = electrons
+
+    #     elif nbr_of_walkers:
+            
+    #         # Set number of walkers
+    #         self.nbr_of_walkers = nbr_of_walkers
+
+    #         # Initialize new electrons
+    #         electrons = []
+
+    #         # Create new electrons
+    #         for _ in range(self.nbr_of_electrons):
                 
-                # Create electron objects
-                electron = Electron(nbr_of_walkers = self.nbr_of_walkers, id=_)
+    #             # Create electron objects
+    #             electron = Electron(nbr_of_walkers = self.nbr_of_walkers, 
+    #                                 id=_, 
+    #                                 dims=self.dims)
 
-                electrons.append(electron)
+    #             electrons.append(electron)
             
-            self.electrons = electrons
+    #         self.electrons = electrons
 
 
     def get_nbr_of_electrons(self):
@@ -65,7 +119,7 @@ class Atom:
             return 0
 
 
-    def get_potential(self):
+    def make_potential(self):
         """
 
         :return:
@@ -73,11 +127,7 @@ class Atom:
 
         # Calculate the potential for each walker and electron (a potentially 6D problem)
         K = 1
-        potential = np.zeros((1, self.nbr_of_walkers))
-        for electron in self.electrons:
-            
-            # Calculate the walker-wise potential for each electron
-            potential += 0.5 * K * np.power(electron.distances, 2)
+        potential = 0.5 * K * np.power(self.distances, 2)
 
         return potential
 

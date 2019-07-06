@@ -5,12 +5,12 @@ from DMC import dmc, get_energy
 def main():
 
     ############## PARAMETERS ###############
-    NBR_OF_SIMS         = 50000
+    NBR_OF_SIMS         = 10000
     INIT_NBR_OF_WALKERS = 400
     ALPHA               = 1e-1
-    INIT_TRIAL_ENERGY   = 0.1#-3
+    NBR_OF_DIMENSIONS   = 3
+    INIT_TRIAL_ENERGY   = NBR_OF_DIMENSIONS*0.5-0.2#-3
     TIMESTEP            = 1e-3
-    NBR_OF_DIMENSIONS   = 1
 
     ############# INITIALIZATION ############
     # Initialize the trial energy used to compute ground state
@@ -47,12 +47,15 @@ def main():
                                                     nbr_of_walkers = state.nbr_of_walkers,
                                                     timestep = TIMESTEP)
 
-            if not (sim % 10000):
+            if not (sim % 1000):
                 print("Iteration %d/%d" % (sim, NBR_OF_SIMS))
                 print("E = %f" % mean_trial)
 
     f.closed
+    print("#####################")
     print("Simulation complete.")
+    print("E = %f" % mean_trial)
+    print("#####################")
 
 
 
@@ -65,10 +68,10 @@ if __name__ == "__main__":
 import numpy as np
 import matplotlib.pyplot as plt
 
-main()
+#main()
 
-data = np.loadtxt("walkers.data")
+#data = np.loadtxt("walkers.data")
 
-plt.plot(data[:,1])
-plt.plot(data[:,2])
-plt.plot(data[:,3])
+#plt.plot(data[:,1])
+#plt.plot(data[:,2])
+#plt.plot(data[:,3])
