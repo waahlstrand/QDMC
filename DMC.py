@@ -113,3 +113,10 @@ def branch_state(state, merits):
                     dims = state.dims)
 
     return new_state
+
+def print_walkers_to_file(walkers, file):
+    
+    for walker in walkers:
+        file.write("%+.4f\t" % (walker.position[0]))
+
+    file.write("\n")
