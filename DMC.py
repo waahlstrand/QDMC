@@ -89,6 +89,32 @@ def branch_state(state, merits):
 
     # New walkers
     branch_walkers = []
+        # New walkers
+        branch_walkers = []
+
+        for i in range(self.nbr_of_walkers):
+
+            # Make m-1 copies of each walker
+            nbr_of_copies = merits[i]
+
+            # Append all copies of these walkers
+            for _ in range(nbr_of_copies):
+
+                branch_walkers.append(self.walkers[i])
+
+
+            # Re-number all walkers
+            for walker, i in zip(branch_walkers, range(len(branch_walkers))):
+                walker.id = i
+
+
+        # Create new state
+        new_state = Atom(alpha = self.alpha,
+                        walkers = branch_walkers,
+                        element = self.element,
+                        dims = self.dims)
+
+        return new_state
 
     for i in range(state.nbr_of_walkers):
 

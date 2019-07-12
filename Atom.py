@@ -21,6 +21,8 @@ class Atom:
         self.positions      = self.make_positions()
         self.distances      = self.make_distances()
 
+
+
     def make_walkers(self, nbr_of_walkers):
             
         # Declare new set of walkers
@@ -51,57 +53,9 @@ class Atom:
 
         return pos
 
-    
     def make_distances(self):
 
         return np.linalg.norm(self.positions, ord=2, axis=1)
-
-    # def __init__(self, alpha, nbr_of_walkers = None, dims = 1, electrons = [], element = "Hydrogen"):
-
-    #     # Set important state parameters
-    #     self.element            = element
-    #     self.alpha              = alpha
-    #     self.nbr_of_electrons   = self.get_nbr_of_electrons()
-    #     self.inter_electron_distances = []
-    #     self.dims               = dims
-
-    #     # Other parameters
-    #     self.nbr_of_walkers     = None
-    #     self.walkers            = []
-
-    #     # Set electrons: Either list of supplied electrons or random initializations
-    #     self.set_walkers(nbr_of_walkers, electrons)
-
-
-    # def set_electrons(self, nbr_of_walkers, electrons):
-
-    #     if electrons:
-
-    #         # Set number of walkers
-    #         self.nbr_of_walkers = electrons[0].nbr_of_walkers
-
-    #         # Add predefined electrons
-    #         self.electrons = electrons
-
-    #     elif nbr_of_walkers:
-            
-    #         # Set number of walkers
-    #         self.nbr_of_walkers = nbr_of_walkers
-
-    #         # Initialize new electrons
-    #         electrons = []
-
-    #         # Create new electrons
-    #         for _ in range(self.nbr_of_electrons):
-                
-    #             # Create electron objects
-    #             electron = Electron(nbr_of_walkers = self.nbr_of_walkers, 
-    #                                 id=_, 
-    #                                 dims=self.dims)
-
-    #             electrons.append(electron)
-            
-    #         self.electrons = electrons
 
 
     def get_nbr_of_electrons(self):
@@ -132,85 +86,115 @@ class Atom:
         return potential
 
 
-    def get_wavefunction(self):
+    def branch_state(self, merits):
 
-        if self.nbr_of_electrons == 2:
-            first_electron = self.electrons[0]
-            second_electron = self.electrons[1]
-            inter = self.inter_electron_distances
+        # New walkers
+        branch_walkers = []
 
-            wave_list = np.exp(- 2*first_electron.distances
-                               - 2*second_electron.distances
-                               + np.divide(inter, (2*(1 + self.alpha*inter)))
-                               )
+        for i in range(self.nbr_of_walkers):
 
-            return wave_list
+            # Make m-1 copies of each walker
+            nbr_of_copies = merits[i]
 
-    def get_inter_electron_distance(self):
-        """
+            # Append all copies of these walkers
+            for _ in range(nbr_of_copies):
 
-        :return:
-        """
-        if self.nbr_of_electrons != 2:
-            print(self.nbr_of_electrons)
+                branch_walkers.append(self.walkers[i])
 
-        electrons = self.electrons
-        d_list = []
-        d = 0
 
-        for first_walker, second_walker in zip(electrons[0].walkers, electrons[1].walkers):
-            for first_pos, second_pos in zip(first_walker.position, second_walker.position):
-                d += (first_pos-second_pos)*(first_pos-second_pos)
+            # Re-number all walkers
+            for walker, i in zip(branch_walkers, range(len(branch_walkers))):
+                walker.id = i
 
-            d_list.append(np.sqrt(d))
 
-        return np.asarray(d_list)
+        # Create new state
+        new_state = Atom(alpha = self.alpha,
+                        walkers = branch_walkers,
+                        element = self.element,
+                        dims = self.dims)
 
-    def get_force(self):
+        return new_state
 
-        force_list = np.zeros((self.nbr_of_electrons, self.nbr_of_walkers, 3))
 
-        for j in range(self.nbr_of_electrons):
-            for i in range(self.nbr_of_walkers):
+    # def get_wavefunction(self):
 
-                electron = self.electrons[j]
-                other = self.electrons[0] if j == 1 else self.electrons[1]
+    #     if self.nbr_of_electrons == 2:
+    #         first_electron = self.electrons[0]
+    #         second_electron = self.electrons[1]
+    #         inter = self.inter_electron_distances
 
-                r = electron.walkers[i].position
-                r_ = other.walkers[i].position
+    #         wave_list = np.exp(- 2*first_electron.distances
+    #                            - 2*second_electron.distances
+    #                            + np.divide(inter, (2*(1 + self.alpha*inter)))
+    #                            )
 
-                r1 = electron.walkers[i].distance if j == 1 else other.walkers[i].distance
+    #         return wave_list
 
-                r12 = self.inter_electron_distances[i]
+    # def get_inter_electron_distance(self):
+    #     """
 
-                force_list[j, i] = -4 * r/r1 + 2 * (r-r_)/(r12*(1+self.alpha*r12)*(1+self.alpha*r12))
+    #     :return:
+    #     """
+    #     if self.nbr_of_electrons != 2:
+    #         print(self.nbr_of_electrons)
 
-        return force_list
+    #     electrons = self.electrons
+    #     d_list = []
+    #     d = 0
 
-    def get_force_fast(self):
+    #     for first_walker, second_walker in zip(electrons[0].walkers, electrons[1].walkers):
+    #         for first_pos, second_pos in zip(first_walker.position, second_walker.position):
+    #             d += (first_pos-second_pos)*(first_pos-second_pos)
 
-        force = np.zeros((self.nbr_of_electrons, self.nbr_of_walkers, 3))
+    #         d_list.append(np.sqrt(d))
 
-        first = self.electrons[0].positions
-        second = self.electrons[1].positions
+    #     return np.asarray(d_list)
 
-        r1 = self.electrons[0].distances
-        r2 = self.electrons[1].distances
+    # def get_force(self):
 
-        r12 = self.inter_electron_distances[:, None]
+    #     force_list = np.zeros((self.nbr_of_electrons, self.nbr_of_walkers, 3))
 
-        force[0] = -4 * first/r1 + 2 * np.divide((first-second), (r12*(1+self.alpha*r12)*(1+self.alpha*r12)))
-        force[0] = -4 * second/r2 + 2 * np.divide((first-second), (r12*(1+self.alpha*r12)*(1+self.alpha*r12)))
+    #     for j in range(self.nbr_of_electrons):
+    #         for i in range(self.nbr_of_walkers):
 
-    def get_electrons(self):
-        """
+    #             electron = self.electrons[j]
+    #             other = self.electrons[0] if j == 1 else self.electrons[1]
 
-        :return:
-        """
-        electrons = []
+    #             r = electron.walkers[i].position
+    #             r_ = other.walkers[i].position
 
-        for _ in range(self.nbr_of_electrons):
-            electron = Electron(nbr_of_walkers=self.nbr_of_walkers, id=_)
-            electrons.append(electron)
+    #             r1 = electron.walkers[i].distance if j == 1 else other.walkers[i].distance
 
-        return electrons
+    #             r12 = self.inter_electron_distances[i]
+
+    #             force_list[j, i] = -4 * r/r1 + 2 * (r-r_)/(r12*(1+self.alpha*r12)*(1+self.alpha*r12))
+
+    #     return force_list
+
+    # def get_force_fast(self):
+
+    #     force = np.zeros((self.nbr_of_electrons, self.nbr_of_walkers, 3))
+
+    #     first = self.electrons[0].positions
+    #     second = self.electrons[1].positions
+
+    #     r1 = self.electrons[0].distances
+    #     r2 = self.electrons[1].distances
+
+    #     r12 = self.inter_electron_distances[:, None]
+
+    #     force[0] = -4 * first/r1 + 2 * np.divide((first-second), (r12*(1+self.alpha*r12)*(1+self.alpha*r12)))
+    #     force[0] = -4 * second/r2 + 2 * np.divide((first-second), (r12*(1+self.alpha*r12)*(1+self.alpha*r12)))
+
+    # def get_electrons(self):
+    #     """
+
+    #     :return:
+    #     """
+    #     electrons = []
+
+    #     for _ in range(self.nbr_of_electrons):
+    #         electron = Electron(nbr_of_walkers=self.nbr_of_walkers, id=_)
+    #         electrons.append(electron)
+
+    #     return electrons
