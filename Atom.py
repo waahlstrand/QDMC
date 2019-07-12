@@ -16,10 +16,12 @@ class Atom:
         # Set walkers
         self.walkers            = walkers if walkers else self.make_walkers(nbr_of_walkers)        
         self.nbr_of_walkers     = nbr_of_walkers if nbr_of_walkers else len(self.walkers)
+        self.max_walker_id      = self.nbr_of_walkers
 
         # Walker derived values
         self.positions      = self.make_positions()
         self.distances      = self.make_distances()
+
 
 
 
@@ -57,7 +59,6 @@ class Atom:
 
         return np.linalg.norm(self.positions, ord=2, axis=1)
 
-
     def get_nbr_of_electrons(self):
         """
         Given an element of a certain type, gives the number of electrons of that element.
@@ -72,7 +73,6 @@ class Atom:
             print("Element not supported.")
             return 0
 
-
     def make_potential(self):
         """
 
@@ -85,7 +85,6 @@ class Atom:
 
         return potential
 
-
     def branch_state(self, merits):
 
         # New walkers
@@ -97,23 +96,43 @@ class Atom:
             nbr_of_copies = merits[i]
 
             # Append all copies of these walkers
-            for _ in range(nbr_of_copies):
+            for copy_id in range(nbr_of_copies):
 
-                branch_walkers.append(self.walkers[i])
+                # Make a copy
+                walker = self.walkers[i].copy()
+
+                if copy_id > 0:
+
+                    # Update new number of walkers
+                    self.max_walker_id += 1
+                    
+                    walker.id = self.max_walker_id
+
+                   
+
+                branch_walkers.append(walker)
 
 
             # Re-number all walkers
-            for walker, i in zip(branch_walkers, range(len(branch_walkers))):
-                walker.id = i
+            #for walker, i in zip(branch_walkers, range(len(branch_walkers))):
+            #    walker.id = i
 
 
-        # Create new state
-        new_state = Atom(alpha = self.alpha,
-                        walkers = branch_walkers,
-                        element = self.element,
-                        dims = self.dims)
+        # Update state
+        self.set_walkers(branch_walkers)
 
-        return new_state
+
+    def set_walkers(self, walkers):
+
+        # Set walkers
+        self.walkers = walkers
+
+        # Set number of walkers
+        self.nbr_of_walkers = len(walkers)
+
+        # Set walker derived values
+        self.positions      = self.make_positions()
+        self.distances      = self.make_distances()
 
 
     # def get_wavefunction(self):

@@ -17,6 +17,7 @@ def main():
     # Initialize the trial energy used to compute ground state
     trial_energy = INIT_TRIAL_ENERGY
     mean_trial   = trial_energy
+    time         = 0
 
     # Initialize atom of choice
     state = Atom(alpha = ALPHA,
@@ -36,7 +37,7 @@ def main():
 
                 # Print walkers
                 if SAVE_WALKERS:
-                    print_walkers_to_file(state.walkers, w)
+                    print_walkers_to_file(state.walkers, time, w)
 
                 # Perform diffusion Monte Carlo without importance sampling
                 state = dmc(state = state,
@@ -53,6 +54,7 @@ def main():
                                                         init_nbr_of_walkers = INIT_NBR_OF_WALKERS,
                                                         nbr_of_walkers = state.nbr_of_walkers,
                                                         timestep = TIMESTEP)
+                time += TIMESTEP
 
                 if not (sim % 1000):
                     print("Iteration %d/%d" % (sim, NBR_OF_SIMS))

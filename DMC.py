@@ -11,9 +11,9 @@ def dmc(state: Atom, trial_energy, timestep = 1e-3, importance = False):
     merits = birth_or_death(trial_state, state, trial_energy, timestep)
 
     # Branch state based on the merits
-    new_state = branch_state(trial_state, merits)
+    trial_state.branch_state(merits)
             
-    return new_state
+    return trial_state
 
 
 def make_trial_state(state, timestep):
@@ -33,7 +33,9 @@ def make_trial_state(state, timestep):
     trial_state = Atom(alpha = state.alpha,
                        walkers = new_walkers,
                        element = state.element,
-                       dims = state.dims)                      
+                       dims = state.dims) 
+
+    trial_state.max_walker_id = state.max_walker_id
 
     return trial_state
 
@@ -68,8 +70,6 @@ def get_energy(alpha, mean_trial, trial_energy, init_nbr_of_walkers, nbr_of_walk
 
     return (trial_energy, mean_trial)
 
-    
-
 def make_trial_walker(walker, timestep):
 
     # Zero mean Gaussian
@@ -89,32 +89,6 @@ def branch_state(state, merits):
 
     # New walkers
     branch_walkers = []
-        # New walkers
-        branch_walkers = []
-
-        for i in range(self.nbr_of_walkers):
-
-            # Make m-1 copies of each walker
-            nbr_of_copies = merits[i]
-
-            # Append all copies of these walkers
-            for _ in range(nbr_of_copies):
-
-                branch_walkers.append(self.walkers[i])
-
-
-            # Re-number all walkers
-            for walker, i in zip(branch_walkers, range(len(branch_walkers))):
-                walker.id = i
-
-
-        # Create new state
-        new_state = Atom(alpha = self.alpha,
-                        walkers = branch_walkers,
-                        element = self.element,
-                        dims = self.dims)
-
-        return new_state
 
     for i in range(state.nbr_of_walkers):
 
@@ -140,9 +114,9 @@ def branch_state(state, merits):
 
     return new_state
 
-def print_walkers_to_file(walkers, file):
+def print_walkers_to_file(walkers, time, file):
     
     for walker in walkers:
-        file.write("%+.4f\t" % (walker.position[0]))
+        file.write("%d\t%f\t%+.4f\n" % (walker.id, time, walker.position[0]))
 
-    file.write("\n")
+    #file.write("\n")

@@ -4,7 +4,6 @@ import numpy as np
 class Walker:
     def __init__(self, id, position, dims = 1):
         self.id         = id
-        self.parents    = []
         self.position   = position
         self.dims       = dims
         self.distance   = self.get_distance_from_origin()
@@ -30,3 +29,10 @@ class Walker:
 
     def set_merit(self, merit):
         self.merit = merit
+
+    def copy(self):
+
+        return Walker(id = self.id, position = self.position, dims = self.dims)
+
+
+    
