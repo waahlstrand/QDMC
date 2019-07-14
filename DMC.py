@@ -9,7 +9,7 @@ def dmc(state, trial_energy, timestep = 1e-3, importance = False):
         state {Atom} -- The previous state of the of the atom simulation.
         trial_energy {double} -- The trial energy to compare with the walker potential.
     
-    Keyword Arguments:modify
+    Keyword Arguments:
         timestep {double} -- Size of the time step of each iteration. (default: {1e-3})
         importance {bool} -- Whether to use importance sampling. (default: {False})
     
@@ -72,9 +72,9 @@ def birth_or_death(trial_state, state, trial_energy, timestep):
     """The birth or death operation creates a list of merit values for all walkers. 
     The merit m decides how many copies of each walker creates,
         
-        m = 0: The walker is removed
-        m = 1: The walker is preserved
-        m > 1: The walker is preserved and m-1 copies are created
+        m = 0: The walker is removed.
+        m = 1: The walker is preserved.
+        m > 1: The walker is preserved and m-1 copies are created.
     
     Arguments:
         trial_state {Atom} -- A trial state with updated walker positions

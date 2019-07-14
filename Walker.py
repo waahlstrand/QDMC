@@ -7,7 +7,7 @@ class Walker:
         self.position   = position
         self.dims       = dims
         self.distance   = self.get_distance_from_origin()
-        self.merit      = 0
+        self.merit      = merit
 
     def __str__(self):
 
@@ -19,10 +19,11 @@ class Walker:
             return "Dimension not implemented."
 
     def get_distance_from_origin(self):
-        """
-        Calculates the Cartesian distance from the center of each walker, simply
-        as d = x^2 + y^2 + z^2
-        :return: Returns a non-negative scalar value
+        """Calculates the Cartesian distance from the center of each walker, simply
+        as d^2 = x^2 + y^2 + z^2
+
+        Returns:
+            double -- Returns a non-negative scalar value
         """
 
         return np.linalg.norm(self.position, 2)
@@ -31,6 +32,11 @@ class Walker:
         self.merit = merit
 
     def copy(self):
+        """Returns a copy of the Walker with the same attributes.
+        
+        Returns:
+            Walker -- A Walker object with the same id, position and number of dimensions.
+        """
 
         return Walker(id = self.id, position = self.position, dims = self.dims)
 

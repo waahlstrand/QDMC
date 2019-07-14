@@ -4,7 +4,19 @@ import numpy as np
 
 class Atom:
 
-    def __init__(self, alpha, nbr_of_walkers = None, dims = 1, walkers = [], element = "Hydrogen"):
+    def __init__(self, alpha, nbr_of_walkers = 0, dims = 1, walkers = [], element = "Hydrogen"):
+        """Initializes the Atom object. Requires either specifying a number of walkers
+        or a list of Walker objects.
+        
+        Arguments:
+            alpha {double} -- Hyperparameter describing the step size of the trial energy updates.
+        
+        Keyword Arguments:
+            nbr_of_walkers {int} -- An int describing the number of walkers. (default: {None})
+            dims {int} -- The number of dimensions of the Atom. (default: {1})
+            walkers {list} -- A list of Walker objects. (default: {[]})
+            element {str} -- The element to simulate, either Hydrogen or Helium. (default: {"Hydrogen"})
+        """
         
         # Set important state parameters
         self.element            = element
@@ -26,6 +38,15 @@ class Atom:
 
 
     def make_walkers(self, nbr_of_walkers):
+        """Creates a list of Walker objects given a number of walkers. Initialized uniformly in
+        [-2, 2]. The dimensionality is decided by the object parameter dims.
+        
+        Arguments:
+            nbr_of_walkers {int} -- The desired number of walkers in the list.
+        
+        Returns:
+            list -- A list of Walker objects with randomly initialized positions.
+        """
             
         # Declare new set of walkers
         walkers = []
@@ -36,6 +57,7 @@ class Atom:
             # Generate random locations
             position = np.random.uniform(-2, 2, self.dims)
 
+            # Create the walker with an identification number
             walker = Walker(id=_, position = position)
 
             walkers.append(walker)
@@ -43,8 +65,11 @@ class Atom:
         return walkers
 
     def make_positions(self):
-
-
+        """A function to extract the position array of all Walker objects attached to the object.
+        
+        Returns:
+            list -- A list of numpy.array with the positions of each walker.
+        """
 
         pos = np.zeros((self.nbr_of_walkers, self.dims))
 
@@ -56,27 +81,38 @@ class Atom:
         return pos
 
     def make_distances(self):
+        """A function to calculate the Walker-wise distance to the origin.
+        
+        Returns:
+            numpy.array -- A numpy array with the Walker-wise distance to the origin.
+        """
 
         return np.linalg.norm(self.positions, ord=2, axis=1)
 
     def get_nbr_of_electrons(self):
+        """Gets the number of electrons of the Atom object, either 1 (Hydrogen)
+        or 2 (Helium).
+        
+        Raises:
+            Exception: If the element is not hydrogen or helium, it is not supported.
+        
+        Returns:
+            int -- The number of electrons of the element.
         """
-        Given an element of a certain type, gives the number of electrons of that element.
-        Currently only supports hydrogen and helium
-        :return:
-        """
+
         if self.element is ("Hydrogen" or "H"):
             return 1
         elif self.element is ("Helium" or "He"):
             return 2
         else:
-            print("Element not supported.")
-            return 0
+            raise Exception("Element not supported. Use Hydrogen or Helium.")
 
     def make_potential(self):
-        """
-
-        :return:
+        """A function to calculate the Walker-wise energy potential. The potential
+        is a harmonic oscillator with spring constant K = 1.
+        
+        Returns:
+            numpy.array -- A numpy array with the walker-wise potential energy.
         """
 
         # Calculate the potential for each walker and electron (a potentially 6D problem)
@@ -86,6 +122,17 @@ class Atom:
         return potential
 
     def branch_state(self, merits):
+        """Updates and branches the list of walkers based on a list of merit values. The 
+        merits m decide how many copies are created from each walker, or if it is removed:
+
+        m = 0: The walker is removed.
+        m = 1: The walker is preserved.
+        m > 1: The walker is preserved and m-1 copies are created.
+        
+        Arguments:
+            merits {list} -- List of ints denoting the merit value of the 
+            correspondingly indexed walker.
+        """
 
         # New walkers
         branch_walkers = []
@@ -101,28 +148,26 @@ class Atom:
                 # Make a copy
                 walker = self.walkers[i].copy()
 
+                # If new walkers are being created
                 if copy_id > 0:
 
-                    # Update new number of walkers
+                    # Update newest walker id
                     self.max_walker_id += 1
-                    
                     walker.id = self.max_walker_id
 
-                   
-
                 branch_walkers.append(walker)
-
-
-            # Re-number all walkers
-            #for walker, i in zip(branch_walkers, range(len(branch_walkers))):
-            #    walker.id = i
-
 
         # Update state
         self.set_walkers(branch_walkers)
 
 
     def set_walkers(self, walkers):
+        """Sets the list of walkers of the Atom object, as well as nbr_of_walkers,
+        positions and distances.
+        
+        Arguments:
+            walkers {list} -- A list of Walker objects to attach to object.
+        """
 
         # Set walkers
         self.walkers = walkers
@@ -135,6 +180,11 @@ class Atom:
         self.distances      = self.make_distances()
 
     def copy(self):
+        """Returns a new Atom object with the same attributes.
+        
+        Returns:
+            Atom -- An Atom object with the same alpha, list of walkers, dims and element.
+        """
 
         return Atom(alpha = self.alpha, 
                     walkers = self.walkers, 
