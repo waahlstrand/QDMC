@@ -134,6 +134,13 @@ class Atom:
         self.positions      = self.make_positions()
         self.distances      = self.make_distances()
 
+    def copy(self):
+
+        return Atom(alpha = self.alpha, 
+                    walkers = self.walkers, 
+                    dims = self.dims, 
+                    element = self.element)
+
 
     # def get_wavefunction(self):
 
